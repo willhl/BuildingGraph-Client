@@ -89,9 +89,6 @@
     <Reference Include="Nito.Disposables, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\Nito.Disposables.2.0.0\lib\netstandard2.0\Nito.Disposables.dll</HintPath>
     </Reference>
-    <Reference Include="shortid, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\shortid.2.0.0\lib\net45\shortid.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
@@ -151,7 +148,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildingGraphClient.cs" />
-    <Compile Include="IGraphDBClient.cs" />
     <Compile Include="Introspection\BuildingGraphArgs.cs" />
     <Compile Include="Introspection\BuildingGraphEnum.cs" />
     <Compile Include="Introspection\BuildingGraphFieldType.cs" />
@@ -165,20 +161,19 @@
     <Compile Include="Introspection\IBuildingGraphFieldType.cs" />
     <Compile Include="Introspection\IBuildingGraphSchema.cs" />
     <Compile Include="Introspection\IBuildingGraphType.cs" />
-    <Compile Include="Model\Edge.cs" />
-    <Compile Include="Model\MEPEdgeTypes.cs" />
-    <Compile Include="Model\Node.cs" />
-    <Compile Include="Model\PendingNode.cs" />
-    <Compile Include="Model\pocos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ExampleElectricalCalcService.cs" />
     <Compile Include="Services\SpaceThermalCalcService.cs" />
-    <Compile Include="Model\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingGraph.Client.Core\BuildingGraph.Client.Core.csproj">
+      <Project>{79e4ed3b-5594-466d-89f9-18d2f00a547e}</Project>
+      <Name>BuildingGraph.Client.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -152,9 +152,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BuildingGraph.Client.GraphQL\BuildingGraph.Client.GraphQL.csproj">
-      <Project>{6217d742-11dc-40d1-8125-d2b98414be03}</Project>
-      <Name>BuildingGraph.Client.GraphQL</Name>
+    <ProjectReference Include="..\BuildingGraph.Client.Core\BuildingGraph.Client.Core.csproj">
+      <Project>{79e4ed3b-5594-466d-89f9-18d2f00a547e}</Project>
+      <Name>BuildingGraph.Client.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
