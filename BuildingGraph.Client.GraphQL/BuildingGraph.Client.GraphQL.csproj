@@ -147,7 +147,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuildingGraphClient.cs" />
+    <Compile Include="Client\BuildingGraphClient.cs" />
     <Compile Include="Introspection\BuildingGraphArgs.cs" />
     <Compile Include="Introspection\BuildingGraphEnum.cs" />
     <Compile Include="Introspection\BuildingGraphFieldType.cs" />
@@ -161,6 +161,9 @@
     <Compile Include="Introspection\IBuildingGraphFieldType.cs" />
     <Compile Include="Introspection\IBuildingGraphSchema.cs" />
     <Compile Include="Introspection\IBuildingGraphType.cs" />
+    <Compile Include="Client\MutationArg.cs" />
+    <Compile Include="Client\MutationRequest.cs" />
+    <Compile Include="Client\NodeMutationType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ExampleElectricalCalcService.cs" />
     <Compile Include="Services\SpaceThermalCalcService.cs" />

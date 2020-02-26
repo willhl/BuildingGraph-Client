@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Dynamic;
-using BuildingGraph.Client;
+using BuildingGraph.Client.Model;
 
 namespace BuildingGraph.Client.Tests
 {

@@ -6,18 +6,18 @@ namespace BuildingGraph.Client
     {
         public PendingNode(Model.Node node)
         {
-            TempId = shortid.ShortId.Generate(7);
+            Id = shortid.ShortId.Generate(7);
             NodeName = node.Label;
         }
 
         public PendingNode(string nodeName)
         {
-            TempId = shortid.ShortId.Generate(7);
+            Id = shortid.ShortId.Generate(7);
             NodeName = nodeName;
         }
         public PendingNode(string nodeName, string id)
         {
-            TempId = id;
+            Id = id;
             NodeName = nodeName;
             WasCommited = !string.IsNullOrEmpty(id);
         }
@@ -25,12 +25,12 @@ namespace BuildingGraph.Client
 
         public void SetCommited(string Id)
         {
-            if (!string.IsNullOrEmpty(Id)) TempId = Id;
+            if (!string.IsNullOrEmpty(Id)) this.Id = Id;
             WasCommited = true;
         }
 
 
-        public string TempId { get; internal set; }
+        public string Id { get; internal set; }
 
         //node no longer required? can just use NodeName
         public string NodeName { get; internal set; }

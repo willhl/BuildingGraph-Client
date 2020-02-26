@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildingGraph.Client.GraphQ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildingGraph.Client.Core", "BuildingGraph.Client.Core\BuildingGraph.Client.Core.csproj", "{79E4ED3B-5594-466D-89F9-18D2F00A547E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildingGraph.Client.Neo4j.Tests", "BuildingGraph.Client.Neo4j.Tests\BuildingGraph.Client.Neo4j.Tests.csproj", "{D3C7E333-0C89-405F-B244-38D21681BA75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{79E4ED3B-5594-466D-89F9-18D2F00A547E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{79E4ED3B-5594-466D-89F9-18D2F00A547E}.Release|x64.ActiveCfg = Release|Any CPU
 		{79E4ED3B-5594-466D-89F9-18D2F00A547E}.Release|x64.Build.0 = Release|Any CPU
+		{D3C7E333-0C89-405F-B244-38D21681BA75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3C7E333-0C89-405F-B244-38D21681BA75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3C7E333-0C89-405F-B244-38D21681BA75}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D3C7E333-0C89-405F-B244-38D21681BA75}.Debug|x64.Build.0 = Debug|Any CPU
+		{D3C7E333-0C89-405F-B244-38D21681BA75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3C7E333-0C89-405F-B244-38D21681BA75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3C7E333-0C89-405F-B244-38D21681BA75}.Release|x64.ActiveCfg = Release|Any CPU
+		{D3C7E333-0C89-405F-B244-38D21681BA75}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

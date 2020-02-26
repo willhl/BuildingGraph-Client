@@ -24,7 +24,7 @@ namespace BuildingGraph.Client
         Queue<MutationRequest> _mutationPushQueue;
         Queue<MutationRequest> _mutationRelateQueue;
         IBuildingGraphSchema _schemaCache;
-        //HttpClient _client;
+
         public BuildingGraphClient(string endPointUrl) : this(endPointUrl, null)
         {
 
@@ -38,7 +38,7 @@ namespace BuildingGraph.Client
             _mutationRelateQueue = new Queue<MutationRequest>();
         }
 
-        public String EndPointUrl
+        public string EndPointUrl
         {
             get { return _endPointUrl; }
         }
@@ -93,7 +93,7 @@ namespace BuildingGraph.Client
                     Variables = eo
                 };
 
-
+                //check query string
                 //var graphQLString = JsonConvert.SerializeObject(assentRequest, _client.Options.JsonSerializerSettings);
 
                 var graphQLResponse = await _client.SendMutationAsync(assentRequest);// SendQueryAsync(assentRequest);
@@ -229,7 +229,7 @@ __schema {
         /// </summary>
         /// <param name="node">The node to add/update</param>
         /// <param name="variables">Variables to add/update for this node</param>
-        /// <param name="mergeOn">To update a node, add Ids or other identifiing variables to match the existing node. Leave null to create a new node.</param>
+        /// <param name="mergeOn">To update a node, add Ids or other identifying variables to match the existing node. Leave null to create a new node.</param>
         /// <returns>The pending node which can be used to relate it to other pending nodes</returns>
         public PendingNode Push(string nodeName, Dictionary<string, object> variables, Dictionary<string, object> mergeOn)
         {
@@ -411,7 +411,7 @@ __schema {
                     string inputVarName = "input" + arg.Name;
 
                     var inputValue = pendingMutation.Variables[arg.Name];
-                    if (inputValue is PendingNode) inputValue = (inputValue as PendingNode).TempId;
+                    if (inputValue is PendingNode) inputValue = (inputValue as PendingNode).Id;
 
                     var inputValueStr = inputValue != null ? inputValue.ToString() : null;
 
@@ -494,67 +494,6 @@ __schema {
         }
 
 
-    }
-
-    public class MutationArg
-    {
-        public MutationArg(string typeName, string argName, object value)
-        {
-            TypeName = typeName;
-            Name = argName;
-            Value = value;
-        }
-
-        public string TypeName;
-        public string Name;
-        public object Value;
-        public string FullArgName
-        {
-            get
-            {
-                return $"${Name}:{TypeName}";
-            }
-        }
-    }
-
-    internal class MutationRequest
-    {
-        public MutationRequest(IBuildingGraphField mutation, PendingNode node, Dictionary<string, object> variables)
-        {
-            Variables = variables;
-            Mutation = mutation;
-            Nodes = new List<PendingNode>();
-            Nodes.Add(node);
-        }
-
-        public Dictionary<string, object> Variables { get; }
-        public List<PendingNode> Nodes { get; }
-        public IBuildingGraphField Mutation { get; }
-        public string ReturnFields { get; set; }
-        public string MutationAlias { get; set; }
-        public string DB_UUID
-        {
-            get; set;
-        }
-        public string Query { get; set; }
-        public bool IsComplete { get; set; }
-    }
-
-    public class AbstractEntityType
-    {
-        string Name { get; }
-    }
-
-    public class ModelElementType
-    {
-
-    }
-
-    public enum NodeMutationType
-    {
-        Update,
-        Create,
-        Delete
     }
 
 }

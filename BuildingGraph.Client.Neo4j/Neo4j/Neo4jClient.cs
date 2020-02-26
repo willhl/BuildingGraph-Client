@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Linq;
 
 using Neo4j.Driver;
+using BuildingGraph.Client.Model;
+
 
 namespace BuildingGraph.Client.Neo4j
 {
@@ -22,6 +24,7 @@ namespace BuildingGraph.Client.Neo4j
         }
 
         HashSet<string> constrained = new HashSet<string>();
+        Queue<PendingCypher> schemaStack = new Queue<PendingCypher>();
         Queue<PendingCypher> pushStack = new Queue<PendingCypher>();
         Queue<PendingCypher> relateStack = new Queue<PendingCypher>();
         List<PendingCypher> commitedList = new List<PendingCypher>();
@@ -37,16 +40,28 @@ namespace BuildingGraph.Client.Neo4j
             await _driver.CloseAsync();
         }
 
-        public async void Commit()
+        public async Task CommitAsync()
         {
             var session = _driver.AsyncSession();
 
-            await pushQueue(pushStack, session);
-            await pushQueue(relateStack, session);
-
-            await session.CloseAsync();
+            try
+            {
+                await pushQueue(schemaStack, session);
+                await pushQueue(pushStack, session);
+                await pushQueue(relateStack, session);
+            }
+            finally
+            {
+                await session.CloseAsync();
+            }
         }
 
+        public void Commit()
+        {
+            var task = CommitAsync();
+
+            task.RunSynchronously();
+        }
 
         private async Task<bool> pushQueue(Queue<PendingCypher> pendingCyphers, IAsyncSession session)
         {
@@ -103,21 +118,21 @@ namespace BuildingGraph.Client.Neo4j
 
 
             Dictionary<string, object> props = new Dictionary<string, object>();
-            props.Add("frid", fromNode.TempId);
-            props.Add("toid", toNode.TempId);
+            props.Add("frid", fromNode.Id);
+            props.Add("toid", toNode.Id);
 
             string query = string.Empty;
             if (qlSafeVariables != null && qlSafeVariables.Count > 0)
             {
                 props.Add("cvar", qlSafeVariables);
                 query =
-                    string.Format("MATCH(a: {0} {{TempId: $frid}}),(b:{1} {{TempId: $toid}})", fromNode.NodeName, toNode.NodeName) +
+                    string.Format("MATCH(a: {0} {{Id: $frid}}),(b:{1} {{Id: $toid}})", fromNode.NodeName, toNode.NodeName) +
                     string.Format("CREATE (a)-[r:{0} $cvar]->(b) ", relType);
             }
             else
             {
                 query =
-                    string.Format("MATCH(a: {0} {{TempId: $frid}}),(b:{1} {{TempId: $toid}})", fromNode.NodeName, toNode.NodeName) +
+                    string.Format("MATCH(a: {0} {{Id: $frid}}),(b:{1} {{Id: $toid}})", fromNode.NodeName, toNode.NodeName) +
                     string.Format("CREATE (a)-[r:{0}]->(b) ", relType);
             }
 
@@ -138,7 +153,7 @@ namespace BuildingGraph.Client.Neo4j
 
         }
 
-        public PendingNode Push(Model.Node node, Dictionary<string, object> variables)
+        public PendingNode Push(Node node, Dictionary<string, object> variables)
         {
             var qlSafeVariables = new Dictionary<string, object>();
 
@@ -158,24 +173,24 @@ namespace BuildingGraph.Client.Neo4j
             props.Add("props", qlSafeVariables);
 
             var pendingNode = new PendingNode(node);
-            if (qlSafeVariables.ContainsKey(pendingNode.TempId))
+            if (qlSafeVariables.ContainsKey(pendingNode.Id))
             {
-                qlSafeVariables.Add("TempId", pendingNode.TempId);
+                qlSafeVariables.Add("Id", pendingNode.Id);
             }
             else
             {
-                qlSafeVariables["TempId"] = pendingNode.TempId;
+                qlSafeVariables["Id"] = pendingNode.Id;
             }
 
             var nodeLabel = node.Label;
             var query = string.Format("CREATE (nn:{0} $props)", nodeLabel);
 
-
+            
             if (!constrained.Contains(nodeLabel))
             {
                 var pecCs = new PendingCypher();
-                pecCs.Query = string.Format("CREATE CONSTRAINT ON(nc:{0}) ASSERT nc.TempId IS UNIQUE", nodeLabel);
-                pushStack.Enqueue(pecCs);
+                pecCs.Query = string.Format("CREATE CONSTRAINT ON(nc:{0}) ASSERT nc.Id IS UNIQUE", nodeLabel);
+                schemaStack.Enqueue(pecCs);
                 constrained.Add(nodeLabel);
             }
 
@@ -191,7 +206,7 @@ namespace BuildingGraph.Client.Neo4j
                 var rs = result;
                 if (pec.FromNode != null)
                 {
-                    pec.FromNode.SetCommited(pec.FromNode.TempId);
+                    pec.FromNode.SetCommited(pec.FromNode.Id);
                 }
 
             };
@@ -199,7 +214,6 @@ namespace BuildingGraph.Client.Neo4j
             return pendingNode;
 
         }
-
 
 
         #region IDisposable Support
