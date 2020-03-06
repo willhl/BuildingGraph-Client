@@ -28,7 +28,7 @@ namespace BuildingGraph.Client.Neo4j
         Queue<PendingCypher> pushStack = new Queue<PendingCypher>();
         Queue<PendingCypher> relateStack = new Queue<PendingCypher>();
         List<PendingCypher> commitedList = new List<PendingCypher>();
-
+        bool _applyIDConstraints = false;
 
         public async Task VerifyConnectionAsync()
         {
@@ -46,6 +46,7 @@ namespace BuildingGraph.Client.Neo4j
 
             try
             {
+               
                 await pushQueue(schemaStack, session);
                 await pushQueue(pushStack, session);
                 await pushQueue(relateStack, session);
@@ -56,12 +57,6 @@ namespace BuildingGraph.Client.Neo4j
             }
         }
 
-        public void Commit()
-        {
-            var task = CommitAsync();
-
-            task.RunSynchronously();
-        }
 
         private async Task<bool> pushQueue(Queue<PendingCypher> pendingCyphers, IAsyncSession session)
         {
@@ -111,7 +106,7 @@ namespace BuildingGraph.Client.Neo4j
                     var qlSafeName = Utils.GetGraphQLCompatibleFieldName(kvp.Key);
                     if (!qlSafeVariables.ContainsKey(qlSafeName))
                     {
-                        qlSafeVariables.Add(qlSafeName, kvp.Value);
+                        qlSafeVariables.Add(qlSafeName, Convert.ToNeo4jType(kvp.Value));
                     }
                 }
             }
@@ -153,6 +148,9 @@ namespace BuildingGraph.Client.Neo4j
 
         }
 
+
+
+
         public PendingNode Push(Node node, Dictionary<string, object> variables)
         {
             var qlSafeVariables = new Dictionary<string, object>();
@@ -164,7 +162,7 @@ namespace BuildingGraph.Client.Neo4j
                     var qlSafeName = Utils.GetGraphQLCompatibleFieldName(kvp.Key);
                     if (!qlSafeVariables.ContainsKey(qlSafeName))
                     {
-                        qlSafeVariables.Add(qlSafeName, kvp.Value);
+                        qlSafeVariables.Add(qlSafeName, Convert.ToNeo4jType(kvp.Value));
                     }
                 }
             }
@@ -186,7 +184,7 @@ namespace BuildingGraph.Client.Neo4j
             var query = string.Format("CREATE (nn:{0} $props)", nodeLabel);
 
             
-            if (!constrained.Contains(nodeLabel))
+            if (_applyIDConstraints && !constrained.Contains(nodeLabel))
             {
                 var pecCs = new PendingCypher();
                 pecCs.Query = string.Format("CREATE CONSTRAINT ON(nc:{0}) ASSERT nc.Id IS UNIQUE", nodeLabel);

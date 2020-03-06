@@ -30,6 +30,10 @@ namespace BuildingGraph.Client.Model
                 if (string.IsNullOrEmpty(_label)) _label = GetType().Name;
                 return _label;
             }
+            set
+            {
+                _label = value;
+            }
         }
 
         public string Name { get; set; }

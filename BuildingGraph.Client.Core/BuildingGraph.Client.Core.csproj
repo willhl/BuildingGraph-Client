@@ -51,6 +51,8 @@
     <Compile Include="Model\Node.cs" />
     <Compile Include="Model\PendingNode.cs" />
     <Compile Include="Model\pocos.cs" />
+    <Compile Include="Model\Types\IPoint3D.cs" />
+    <Compile Include="Model\Types\Point3D.cs" />
     <Compile Include="Model\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

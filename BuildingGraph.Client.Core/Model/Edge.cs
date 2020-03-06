@@ -10,10 +10,7 @@ namespace BuildingGraph.Client.Model
         }
 
         public MEPEdgeTypes EdgeType { get; set; }
-
-
-        Dictionary<string, object> _extendedProperties = new Dictionary<string, object>();
-        public Dictionary<string, object> ExtendedProperties { get => _extendedProperties; }
+        public Dictionary<string, object> ExtendedProperties { get; } = new Dictionary<string, object>();
         public virtual Dictionary<string, object> GetAllProperties()
         {
             var allProps = new Dictionary<string, object>();
