@@ -6,6 +6,8 @@ using BuildingGraph.Client.Model;
 
 namespace BuildingGraph.Client.Neo4j.Tests
 {
+
+
     [TestClass]
     public class LoadTests
     {

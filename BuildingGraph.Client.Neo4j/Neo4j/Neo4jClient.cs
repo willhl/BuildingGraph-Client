@@ -57,25 +57,50 @@ namespace BuildingGraph.Client.Neo4j
             }
         }
 
+        public async Task<QueryResults> RunCypherQueryAsync(string query, Dictionary<string, object> props)
+        {
+
+            QueryResults res = new QueryResults("New Query");
+            
+            var session = _driver.AsyncSession();
+            try
+            {
+                var wtxResult = await session.WriteTransactionAsync(async tx =>
+                {
+                    var result = await tx.RunAsync(query, props);
+                    var rsres  = await result.ToListAsync();  
+                    return rsres;
+                });
+
+                res = new QueryResults(wtxResult);
+            }
+            finally
+            {
+                await session.CloseAsync();
+            }
+
+            return res;
+        }
+
 
         private async Task<bool> pushQueue(Queue<PendingCypher> pendingCyphers, IAsyncSession session)
         {
 
-            var pushTasks = new List<Task>();
+            //var pushTasks = new List<Task>();
 
-            var wtxResult = session.WriteTransactionAsync(tx =>
+            var wtxResult = session.WriteTransactionAsync(async tx =>
             {
                 while (pendingCyphers.Count > 0)
                 {
                     var pendingQuery = pendingCyphers.Dequeue();
-                    var result = pendingQuery.Props != null && pendingQuery.Props.Count > 0 ? tx.RunAsync(pendingQuery.Query, pendingQuery.Props).ContinueWith((t) =>
-                    { pendingQuery.NodeCommited(t.Result); }) : tx.RunAsync(pendingQuery.Query).ContinueWith((t) =>
-                    { pendingQuery.NodeCommited(t.Result); });
+                    var result = await (pendingQuery.Props != null && pendingQuery.Props.Count > 0 ? tx.RunAsync(pendingQuery.Query, pendingQuery.Props) : tx.RunAsync(pendingQuery.Query));
 
-                    pushTasks.Add(result);
-                    commitedList.Add(pendingQuery);
+                    pendingQuery.Complete(result);
+                
+                    //pushTasks.Add(result);
+                   // commitedList.Add(pendingQuery);
                 }
-                return Task.WhenAll(pushTasks);
+                //return Task.WhenAll(pushTasks);
             });
 
 
@@ -131,11 +156,11 @@ namespace BuildingGraph.Client.Neo4j
                     string.Format("CREATE (a)-[r:{0}]->(b) ", relType);
             }
 
-            var pec = new PendingCypher();
+            var pec = new PendingNodeRelate();
             pec.Query = query;
             pec.Props = props;
 
-            pec.Committed = (IResultCursor result) =>
+            pec.Completed = (IResultCursor result) =>
             {
                 var rs = result;
             };
@@ -186,25 +211,25 @@ namespace BuildingGraph.Client.Neo4j
             
             if (_applyIDConstraints && !constrained.Contains(nodeLabel))
             {
-                var pecCs = new PendingCypher();
+                var pecCs = new PendingNodePush();
                 pecCs.Query = string.Format("CREATE CONSTRAINT ON(nc:{0}) ASSERT nc.Id IS UNIQUE", nodeLabel);
                 schemaStack.Enqueue(pecCs);
                 constrained.Add(nodeLabel);
             }
 
-            var pec = new PendingCypher();
+            var pec = new PendingNodePush();
             pec.Query = query;
             pec.Props = props;
             pec.Node = node;
-            pec.FromNode = pendingNode;
+            pec.PushNode = pendingNode;
             pushStack.Enqueue(pec);
 
-            pec.Committed = (IResultCursor result) =>
+            pec.Completed = (IResultCursor result) =>
             {
                 var rs = result;
-                if (pec.FromNode != null)
+                if (pec.PushNode != null)
                 {
-                    pec.FromNode.SetCommited(pec.FromNode.Id);
+                    pec.PushNode.SetCommited(pec.PushNode.Id);
                 }
 
             };
