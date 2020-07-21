@@ -16,7 +16,7 @@ using BuildingGraph.Client.Model;
 
 namespace BuildingGraph.Client
 {
-    public class BuildingGraphClient //: IGraphDBClient
+    public class BuildingGraphClient
     {
         string _endPointUrl;
         GraphQLHttpClient _client;

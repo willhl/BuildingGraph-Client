@@ -1,38 +1,56 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BuildingGraph.Client.Model
 {
     public class Node
     {
-        string _label;
+        ICollection<string> _labels = new List<string>();
 
         public Node()
         {
         }
 
-        public Node(string Label)
+        public Node(string Label) : this()
         {
-            _label = Label;
+            _labels.Add(Label);
         }
 
-        public Node(string Label, string Id)
+        public Node(string Label, string Id) : this(Label)
         {
-            _label = Label;
             this.Id = Id;
         }
 
+        public Node(ICollection<string> Labels, string Id)
+        {
+            foreach (var lb in Labels) _labels.Add(lb);
+            this.Id = Id;
+        }
+
+        public Node(ICollection<string> Labels)
+        {
+            foreach (var lb in Labels) _labels.Add(lb);
+        }
+
+
         public string Id { get; set; }
 
-        public virtual string Label
+
+        public string Label
         {
             get
             {
-                if (string.IsNullOrEmpty(_label)) _label = GetType().Name;
-                return _label;
+                return Labels.First();
             }
-            set
+        }
+
+        public virtual ICollection<string> Labels
+        {
+            get
             {
-                _label = value;
+                if (_labels.Count == 0 && !_labels.Contains(GetType().Name)) _labels.Add(GetType().Name);
+                return _labels;
             }
         }
 

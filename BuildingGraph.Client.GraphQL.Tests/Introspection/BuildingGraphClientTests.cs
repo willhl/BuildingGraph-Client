@@ -18,7 +18,7 @@ namespace BuildingGraph.Client.Tests
         [TestMethod()]
         public void ElecticalService_AddSocketsToSpaces()
         {
-            var client = new BuildingGraphClient(@"https://hlbuildinggraph.azure-api.net/dev/graphql?subscription-key=ed83b43d55ff4d4eb2e01443d0a7864d");
+            var client = new BuildingGraphClient(@"https://localhost:4001/graphql");
             var project = "Project Graph";
             var building = "Dynamo Tower";
 
@@ -304,7 +304,7 @@ namespace BuildingGraph.Client.Tests
         [TestMethod()]
         public void getSchema()
         {
-            var bc = new BuildingGraphClient(@"https://hlbuildinggraph.azure-api.net/dev/graphql?subscription-key=ed83b43d55ff4d4eb2e01443d0a7864d");
+            var bc = new BuildingGraphClient(@"https://localhost:4001/graphql");
             var cs = bc.GetSchema();
             var ojs = cs.Types.Where(ts => ts.Kind == "OBJECT").ToList();
 
@@ -390,7 +390,7 @@ namespace BuildingGraph.Client.Tests
   }
 }";
             var vars = new Dictionary<string, object>();
-            vars.Add("modelIdent", @"8764c510-57b7-44c3-bddf-266d86c26380-0000c160:C:\Users\reynoldsw\Documents\HL-ZZ-ZZ-MEP-0001 WTS Living Lab_detached_reynoldsw.rvt");
+            vars.Add("modelIdent", @"8764c510-57b7-44c3-bddf-266d86c26380-0000c160:TestModel.rvt");
 
      
             var res = bc.ExecuteQuery(query, vars);
@@ -422,13 +422,46 @@ namespace BuildingGraph.Client.Tests
 
         }
 
-        /*
         [TestMethod()]
-        public void ElecticalSerivce_CalcLoads()
+        public void QureyFCuElements()
         {
-            //find panels without outgoing
-            //calc loads on all outgoing circuits
-            //builds tree
-        }*/
+            var bc = new BuildingGraphClient(@"http://localhost:4002/graphql", null);
+
+            var query = @"
+query($fcuid:ID!){
+ FanCoilUnit (Id:$fcuid){
+   Id
+   ModelElements{
+      Id
+      UniqueId
+     }
+   Space{
+        Id
+     }
+   }
+}";
+            var vars = new Dictionary<string, object>();
+            vars.Add("fcuid", "68a3e4eb-edcc-4df8-9e5b-bdd13096afa7");
+
+
+            var res = bc.ExecuteQuery(query, vars);
+
+            if (res.FanCoilUnit != null)
+            {
+                var fcu = res.FanCoilUnit[0];
+                foreach (var modelelemet in fcu.ModelElements)
+                {
+                    var id = modelelemet.Id;
+                }
+
+                if (fcu.Space != null)
+                {
+                    var spaceId = fcu.Space.Id.Value;
+                }
+            }
+
+
+        }
+
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using BuildingGraph.Client.Introspection;
 
 namespace HLApps.Cloud.BuildingGraph.Introspection.Tests
 {
@@ -15,9 +15,9 @@ namespace HLApps.Cloud.BuildingGraph.Introspection.Tests
         [TestMethod()]
         public void BuildingGraphMappingTest()
         {
-            var json = System.IO.File.ReadAllText(@"C:\src\HLApps\GraphData-MEP\HLApps.Revit.Graph\RevitToGraphQLMappings.json");
+            var json = System.IO.File.ReadAllText(@"..\..\BuildingGraph-Client-Revit\BuildingGraph.Integration.Revit\RevitToGraphQLMappings.json");
             
-            //var bgmap = new BuildingGraphMapping(json);
+            var bgmap = new BuildingGraphMapping(json);
           
 
 

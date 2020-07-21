@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace BuildingGraph.Client
 {
@@ -7,7 +8,8 @@ namespace BuildingGraph.Client
         public PendingNode(Model.Node node)
         {
             Id = shortid.ShortId.Generate(7);
-            NodeName = node.Label;
+            NodeName = node.Labels.First();
+            Labels = node.Labels;
         }
 
         public PendingNode(string nodeName)
@@ -32,7 +34,8 @@ namespace BuildingGraph.Client
 
         public string Id { get; internal set; }
 
-        //node no longer required? can just use NodeName
+
+        public ICollection<string> Labels { get; internal set; }
         public string NodeName { get; internal set; }
 
         public bool WasCommited { get; internal set; }
