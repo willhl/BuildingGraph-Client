@@ -1,4 +1,7 @@
-﻿namespace BuildingGraph.Client.Kafka
+﻿using System;
+
+
+namespace BuildingGraph.Client.Kafka
 {
     public class StreamMessage
     {

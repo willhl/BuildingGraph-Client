@@ -1,4 +1,8 @@
-﻿namespace BuildingGraph.Client.Kafka
+﻿using System.Collections.Generic;
+using BuildingGraph.Client.Model;
+
+
+namespace BuildingGraph.Client.Kafka
 {
     public class PayloadContent
     {
