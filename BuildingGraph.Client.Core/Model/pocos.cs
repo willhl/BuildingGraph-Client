@@ -36,11 +36,10 @@ namespace BuildingGraph.Client.Model
         public string number { get; set; }
     }
 
-    public class RevitModel : Node
+    public class Model : Node
     {
         public string uri { get; set; }
 
-        public override string Label => "Model";
     }
 
     public class ForgeModel : Node

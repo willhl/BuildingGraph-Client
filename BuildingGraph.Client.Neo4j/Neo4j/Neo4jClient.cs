@@ -7,20 +7,29 @@ using System.Linq;
 
 using Neo4j.Driver;
 using BuildingGraph.Client.Model;
-
+using System.Xml.Linq;
 
 namespace BuildingGraph.Client.Neo4j
 {
-
 
     public class Neo4jClient : IDisposable
     {
 
 
         IDriver _driver;
-        public Neo4jClient(Uri host, string userName, string password)
+        string _database;
+        Dictionary<string, string[]> _labelMapping;
+
+        public Neo4jClient(Uri host, string userName, string password) : this(host, userName, password, string.Empty)
+        {
+     
+        }
+
+        public Neo4jClient(Uri host, string userName, string password, string database)
         {
             _driver = GraphDatabase.Driver(host, AuthTokens.Basic(userName, password));
+            _database = database;
+            _labelMapping = LabelMap.DefaultMapping;
         }
 
         HashSet<string> constrained = new HashSet<string>();
@@ -42,14 +51,30 @@ namespace BuildingGraph.Client.Neo4j
 
         public async Task CommitAsync()
         {
-            var session = _driver.AsyncSession();
+            IAsyncSession session;
+
+            if (!string.IsNullOrEmpty(_database))
+            {
+                session = _driver.AsyncSession((cf) => cf.WithDatabase(_database));
+            }
+            else
+            {
+                session = _driver.AsyncSession();
+            }
 
             try
             {
-               
-                await pushQueue(schemaStack, session);
-                await pushQueue(pushStack, session);
-                await pushQueue(relateStack, session);
+
+                var sessionVars = new Dictionary<string, object>();
+                sessionVars.Add("TimeStamp", DateTime.Now);
+                sessionVars.Add("By", System.Environment.UserName);
+                var sessionNode = new Node("Session");
+                Push(sessionNode, sessionVars);
+
+                await pushQueue(schemaStack, session, sessionNode.Id);
+                await pushQueue(pushStack, session, sessionNode.Id);
+                await pushQueue(relateStack, session, sessionNode.Id);
+
             }
             finally
             {
@@ -61,14 +86,14 @@ namespace BuildingGraph.Client.Neo4j
         {
 
             QueryResults res = new QueryResults("New Query");
-            
+
             var session = _driver.AsyncSession();
             try
             {
                 var wtxResult = await session.WriteTransactionAsync(async tx =>
                 {
                     var result = await tx.RunAsync(query, props);
-                    var rsres  = await result.ToListAsync();  
+                    var rsres = await result.ToListAsync();
                     return rsres;
                 });
 
@@ -83,30 +108,35 @@ namespace BuildingGraph.Client.Neo4j
         }
 
 
-        private async Task<bool> pushQueue(Queue<PendingCypher> pendingCyphers, IAsyncSession session)
+        private async Task<bool> pushQueue(Queue<PendingCypher> pendingCyphers, IAsyncSession session, string sessionId)
         {
 
             //var pushTasks = new List<Task>();
 
-            var wtxResult = session.WriteTransactionAsync(async tx =>
+            var wtxResult = await session.WriteTransactionAsync(async tx =>
             {
                 while (pendingCyphers.Count > 0)
                 {
                     var pendingQuery = pendingCyphers.Dequeue();
+
+                    if (pendingQuery.Props != null && pendingQuery.Props.ContainsKey("SessionId"))
+                    {
+                        pendingQuery.Props["SessionId"] = sessionId;
+                    }
+
                     var result = await (pendingQuery.Props != null && pendingQuery.Props.Count > 0 ? tx.RunAsync(pendingQuery.Query, pendingQuery.Props) : tx.RunAsync(pendingQuery.Query));
 
                     pendingQuery.Complete(result);
-                
+
                     //pushTasks.Add(result);
-                   // commitedList.Add(pendingQuery);
+                    // commitedList.Add(pendingQuery);
                 }
+                return true;
                 //return Task.WhenAll(pushTasks);
             });
 
 
-            await wtxResult;
-
-            return true;
+            return wtxResult;
 
         }
 
@@ -192,9 +222,6 @@ namespace BuildingGraph.Client.Neo4j
                 }
             }
 
-            Dictionary<string, object> props = new Dictionary<string, object>();
-            props.Add("props", qlSafeVariables);
-
             var pendingNode = new PendingNode(node);
             if (qlSafeVariables.ContainsKey(pendingNode.Id))
             {
@@ -205,10 +232,24 @@ namespace BuildingGraph.Client.Neo4j
                 qlSafeVariables["Id"] = pendingNode.Id;
             }
 
-            var nodeLabel = node.Label;
-            var query = string.Format("CREATE (nn:{0} $props)", nodeLabel);
+            if (!qlSafeVariables.ContainsKey("SessionId"))
+            {
+                qlSafeVariables.Add("SessionId", "");
+            }
 
-            
+            Dictionary<string, object> props = new Dictionary<string, object>();
+            props.Add("props", qlSafeVariables);
+
+            //todo: sort out multiple labels
+            var nodeLabel = node.Labels.First();
+            var allNodeLabels = node.Labels.First();
+            if (_labelMapping.ContainsKey(nodeLabel))
+            {
+                allNodeLabels = nodeLabel + ":" + string.Join(":", _labelMapping[nodeLabel]);
+            }
+
+            var query = string.Format("CREATE (nn:{0} $props)", allNodeLabels);
+
             if (_applyIDConstraints && !constrained.Contains(nodeLabel))
             {
                 var pecCs = new PendingNodePush();
